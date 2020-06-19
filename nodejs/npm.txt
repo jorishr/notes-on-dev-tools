@@ -1,0 +1,121 @@
+####################
+NODE PACKAGE MANAGER
+#########################
+I.	ABOUT NPM
+II.	ADDING DEPENDENCIES
+III.	NPX
+IV.	NPM VERSIONING
+V.	NPM TROUBLESHOOTING
+#########################
+
+###############
+I.	ABOUT NPM
+###############
+
+Lot's of package have already been written and are available through the Node Package Manager. A package manager holds all the available code packages and can manages updates.
+
+NPM contains:
+
+- specific Node packages for automation, build tools and server tasks
+- other JS and CSS packages (JQuery, Bootstrap, Normalize, etc.)  
+
+For each new project you can select and use different packages that are stored the file packages.json:
+
+	npm init		
+
+Walks through setup of packages.json file in the root project directory.
+
+NOTES
+The packages.json needs to be included in the git repo. If you need to work on a different machine you can simply run <npm install> in the project folder with this .json and Node will use the json file to download all the necessary packages/modules.
+
+- the <node_modules> folder is ignored by GIT, all the info it needs is in the packages.json file
+
+- package.json: records the minimum version you app needs. If you update the versions of a particular package, the change is not going to be reflected here.
+
+- package-lock.json: records the exact version of each installed package which allows you to re-install them. Future installs will be able to build an identical dependency tree. 
+
+
+EVENT-STREAM VULNERABILTY
+
+By default the scripts in package.json can be executed and this a security concern as it could contain a virus.
+
+To prevent this edit the npm config settings:
+
+	npm config set ignore-scripts true
+
+#########################
+II.	ADDING DEPENDENCIES
+#########################
+
+In the local project folder:
+
+npm install jquery normailize.css --save 
+	//	those packages will be bundled into the project code
+	SHORTHAND npm i <package>
+
+npm install gulp --save-dev 
+	//	part of the devDependencies, required for development, 	not part of the final production code
+	SHORTHAND npm i -D <package>
+
+Development dependencies are intended as development-only packages, that are unneeded in production. For example testing packages, webpack or Babel.
+
+When you go in production, if you type npm install and the folder contains a package.json file, they are installed, as npm assumes this is a development deploy.
+
+You need to set the --production flag ( npm install --production ) to avoid installing those development dependencies.
+
+NPM PRUNE
+
+Remove unused npm packages automatically at the end of development/production, read up. Apply to finished projects
+add to workflow overview todo.
+
+#########
+III.	NPX
+#########
+
+Along with npm 5.2 came a new utility, npx, to help with a few popular npm binary execution tasks and give your workflow a boost. Normally, if you want to run a binary that’s installed locally with your project instead of globally on the machine, you’d have to type the following: ./local/path/binary
+
+With NPX:
+
+npx cowsay 'hello' 	
+	// runs a locally installed binary without having to install 	 and keep up-to-date a global installation
+
+npx http-server		// starts a server in the local dir
+
+Using NPX you can run specific version of let's say GULP for each project.
+
+####################
+IV.	NPM VERSIONING
+####################
+
+When you make a new release, you don't just up a number as you please, but you have rules:
+
+You up the major version when you make incompatible API changes.
+
+You up the minor version when you add functionality in a backward-compatible manner.
+
+You up the patch version when you make backward-compatible bug fixes.
+
+Thus 7.4.5 means major version 7, minor update 4 and patch version 5.
+
+In the NPM package.json you can indicate which updates are allowed:
+
+^ : if you write ^0.13.0 when running npm update it can update to patch and minor releases: 0.13.1 , 0.14.0 and so on.
+
+For full list see NPM docs.
+
+#########################
+V.	NPM TROUBLESHOOTING
+#########################
+
+PACKAGES THROW ENOENT ERRORS
+
+Solutions:
+RUN THEM MANUALLY FIRST
+node node_modules/pngquant-bin/lib/install.js
+node node_modules/zopflipng-bin/lib/install.js
+node node_modules/jpegoptim-bin/lib/install.js
+node node_modules/optipng-bin/lib/install.js
+node node_modules/jpeg-recompress-bin/lib/install.js
+
+REBUILD THE PACKAGE
+npm rebuild pngquant-bin

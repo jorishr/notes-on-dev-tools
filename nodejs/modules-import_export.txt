@@ -1,0 +1,189 @@
+########################
+IMPORT/EXPORT JS MODULES
+########################
+I.	MODULES
+II. 	NODEJS: REQUIRE (COMMON JS)
+III.	ES6 IMPORT/EXPORT
+########################
+
+
+#############
+I.	MODULES
+#############
+
+Modules always 'use strict' by default.
+
+Each module has its own scope. Thus it is expected that when a variable or function is required outside that scope it is exported.
+
+The this keyword does at top-level does not refer to the window object but has the value of UNDEFINED in a module.
+
+An exported module is only evaluated ONCE. Exports are generated, and then they are shared between importers, so if something changes in an exported module, all importing modules will see that.
+
+//admin.js
+export let admin = {
+  name: "John"
+};
+// 1.js
+import {admin} from './admin.js';
+admin.name = "Pete";
+
+// 2.js
+import {admin} from './admin.js';
+console.log(admin.name); //-> Pete
+
+Because both 1.js and 2.js imported the same object changes made in 1.js are visible in 2.js
+
+
+BROWSER LOADING
+Module scripts are always deferred, same effect as defer attribute. Thus they don't run untill the html is fully loaded.
+
+<script type="module" src="...">
+
+When using modules, we should be aware that the HTML page shows up as it loads, and JavaScript modules run after that, so the user may see the page before the JavaScript application is ready. Some functionality may not work yet. We should put “loading indicators”, or otherwise ensure that the visitor won’t be confused by that.
+
+PATH
+Certain environments, like Node.js or bundle tools allow BARE modules, without any path, as they have their own ways for finding modules and hooks to fine-tune them. But browsers do not support bare modules.
+
+import {sayHi} from 'sayHi'; 
+// Error, "bare" module
+// the module must have a path, e.g. './sayHi.js'
+
+In real-life, browser modules are rarely used in their “raw” form. Usually, we bundle them together with a special tool such as Webpack and deploy to the production server.
+
+So the resulting “bundled” script does not contain any import/export, it doesn’t require type="module", and we can put it into a regular script tag.
+
+
+############################
+II.	IN NODEJS DEV: REQUIRE
+############################
+
+NODEJS uses the COMMON JS implementation model for modules, as originally it was not supported by native JS.
+
+In a NodeJs environment a JS file that has a variable grasping a require('') statement will be located at the referenced module and IMPORT it's EXPORTED module: module.exports
+
+This module can be exported with a single function 
+
+	module.exports = function(){} 
+	
+	OR exports.<propertyName> = functionOne;	
+		// exports earlier defined fn
+	
+	exports.<name> = functionTwo; 
+
+In the main.js file you require('') that code and put it into a variable (with the same name). The require() immediately executes that code.
+
+NOTE: the module.exports is an OBJECT that can hold many things. 
+
+
+#########
+III.	ES6
+#########
+
+A.	EXPORT
+
+Both default export and the standard export can be used in the same file. Note that the export default can be only one thing, usually your main class constructor.
+
+INLINE
+	
+	export default class <name> { constructor(){} };
+	export function <name> (){}	
+	export function <name> (){}
+
+STANDARD EXPORT OBJECT AT BOTTOM
+
+	const arr1 = [1,2,3];
+	function f1(arr1){return arr1.map(val => val * 2)};
+	export {arr1, f1, <fn-name>, <var-name>, ...};
+
+
+DEFAULT EXPORT
+
+Technically, we may have both default and named inline exports in a single module, but in practice people usually don’t mix them. A module has either named exports or the default one.
+	
+	export default <name of class, function or var>
+
+Named exports are explicit. They exactly name what they import, so we have that information from them, that’s a good thing.
+
+Named exports enforce us to use exactly the right name to import. But team members may use different names to import the same thing, and that’s not good.
+
+Thus when using default export there’s a rule that imported variables should correspond to file names:
+
+import User from './user.js';
+import LoginForm from './loginForm.js';
+import func from '/path/to/func.js';
+
+
+B.	IMPORT
+
+- IMPORT FUNCTIONS AND VARS
+Always use curly braces {...} from '<path>';
+
+	import {<fnName>, <fnName>} from './partial.js'
+
+Use an ABSOLUTE or RELATIVE path: '/' or './' or '../'
+
+- IMPORT EVERYTHING WITH *
+
+If there’s a lot to import, we can import everything as an object using import * as <obj>
+
+	export function sayHi() { ... }
+	export function sayBye() { ... }
+
+	import * as say from './say.js';
+	say.sayHi('X');
+	say.sayBye('Y');
+
+Be careful with *, it seems convienent but unused function will be remove by bundlers (tree-shaking) and it is shorter to have explicit names imported (sayHi instead of say.sayHi).
+ 
+
+- IMPORT DEFAULT
+	
+To import the default object:
+
+	import <defaultName> from './partial.js';
+	import User from './user.js';
+
+
+- NAME CHANGES
+
+The import syntax allows us to change the name of imported object.
+
+Thus export default User can imported as 
+
+	import U from './partial.js'
+
+Or a function can be re-named:
+
+	import {<fnName> as newName, <fnName>} from './partial.js'
+
+
+#####################
+IV.	DYNAMIC IMPORTS
+#####################
+
+Export and import statements that we covered in previous chapters are called “static”. The syntax is very simple and strict.
+
+But we cannot use those static imports in an conditional statement, for example.
+
+To import a module conditionally or on-demand use import() anywhere in hte code.
+
+import(<modulePath>)
+  .then(obj => <module object>)
+  .catch(err => <loading error, e.g. if no such module>);
+
+or let module = await import(<modulePath>);
+
+EXAMPLE
+
+export function hi() {
+  alert(`Hello`);
+}
+
+export function bye() {
+  alert(`Bye`);
+}
+async function load() {
+	let {hi, bye} = await import('./say.js');
+	hi();
+	bye();
+}

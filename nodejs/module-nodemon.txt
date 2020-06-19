@@ -1,0 +1,17 @@
+#####################
+NODEJS NODEMON MODULE
+#####################
+
+NODEMON can run as an npm script that executes your JS file and watches continously for updates. You can use it in combination with BABEL to auto-transpile ES2015 JS code, since some features are not supported by NODEJS (import).
+
+	npm install nodemon --save-dev
+
+In package.json add NPM script
+
+"scripts": {
+    "start": "nodemon --exec babel-node src/index.js",
+
+Requires babel-node to be installed.
+
+
+GULP+NODEMON + BROWSERSYNC

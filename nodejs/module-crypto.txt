@@ -1,0 +1,38 @@
+#############
+MODULE CRYPTO
+###################################
+I.	GENERATE A TOKEN
+II.	CREATE A HASH FROM STRING
+III.	ENCRYPT AND DECRYPT A MESSAGE
+###################################
+
+########################################
+I.	GENERATE A TOKEN FOR SERIALIZATION
+########################################
+
+If you need a token key to store in the .env you can generate that in the nodeconsole.
+Note that you need to pass the parameter 'hex' to the .toString() method to get hexadecimal values instead of byte notation.
+
+	node 
+	require('crypto').randomBytes(64).toString('hex');
+
+
+###################
+II.	CREATE A HASH
+###################
+
+Note that crypto is an asynchronous operation.
+
+const crypto = require('crypto');
+console.log(crypto.getHashes()); 	
+//-> output list of algo's
+
+let hash = crypto.createHash('sha256').update('myString').digest('hex');
+console.log(hash);
+
+
+###################################
+III.	ENCRYPT AND DECRYPT A MESSAGE
+###################################
+
+See Engineer Man Nodejs Basics - 8.Cryptography

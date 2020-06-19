@@ -1,0 +1,131 @@
+################
+GULP TASK RUNNER
+################################
+I.		ABOUT GULP
+II. 		GULP FILE
+III. 		GULP API BASICS
+IV.		PATHS AND GLOBS
+################################
+
+###########
+I.	ABOUT
+###########
+
+GulpJS is a toolkit for automating painful or time-consuming tasks in your development workflow. 
+
+NOTE: The following is based on Gulp v4.0. 
+
+Add the GULP commands to the NPM package.json under scripts:
+	
+	"start": "gulp"	-> default task for dev
+	"build": "gulp"	-> build task when preparing for deploy
+
+Use node's NPX for local install of GULP: npx gulp <task>
+
+###############
+II.	GULP FILE
+###############		
+
+Create a GULP file in the project root folder: gulpfile.js
+
+To split up the gulp file:
+
+- create a folder named gulpfile.js
+
+- inside: index.js (the main file with imports)
+
+- seperate files <task>.js for each task whereby you export the function tasks.
+
+
+#####################
+III.	GULP API BASICS
+#####################
+
+All dependencies you install need to be imported as variables with the require() function in the gulpfile.js:
+
+ 	const	 sass 		= require('gulp-sass'), 
+		 autoprefix 	= require('gulp-autoprefixer'),
+		 ...; 
+
+Gulp APIs, like src(), dest(), series(), or parallel(), are part of asynchronous functions that represent the tasks that have to be performed.
+
+Any exported functions will be registered into gulp's task system as task that can be run:
+
+	exported.myTask = fnDefinedInGulpfile
+
+Tasks that are not exported are considered to be PRIVATE and are part of series() or parallel() API's. Normal tasks that you want to run as gulp <task> in the command line are PUBLIC and need to be EXPORTED as shown above.
+
+ 	gulp --tasks 	// shows list of public tasks
+
+HOW TASK FUNCTIONS WORK
+
+Each gulp task is an asynchronous JavaScript function. Each function accepts an error-first callback OR RETURNS a stream, a promise, an event emitter, a child process, or an observable.
+
+The basic syntax:
+
+ 	function task(){
+		return gulp.src(<files to watch)
+			.pipe()
+			.pipe()
+			.pipe()
+			.pipe(gulp.dest(<output>))
+	}
+
+Thus the task function returns a value, otherwise gulp wouldn't know the task is finished. 
+
+The src() method locates the files it has to perform the task onto.
+
+Each pipe can be a part of the task. When all tasks are performed the resulting value is piped through the dest() method which produces the final value in the desired location. 
+
+SERIES AND PARALLEL
+
+To run tasks in a certain order on the same files you can use series(). The second function will run only after the first one is complete.
+
+	series(<fn1>, <fn2>)
+	parallel(<fn1>, <fn2>)
+
+	watch(<glob>, series(<fn1>, <fn2>))
+
+
+#####################
+IV.	PATHS AND GLOBS
+#####################		
+
+FOLDER STRUCTURE GULP
+
+Here is an example directory structure in which source code (src) is separated from temporary precompiled assets (.tmp), which are separated from the final distribution folder (dist). The src folder contains higher level languages such as jade, typescript and scss; the .tmp contains compiled js, css and html files; while the dist folder contains only concatenated and minified files optimized to be served in production.
+
+Take a good look at the path of the (s)css and js files you are working with, as well as the folder structure. It is advisable to store those paths into VARIABLES for easier references in the function.
+
+NOTE: it is not recommended to use NODEJS PATH methods inside globs because of the escape char \\ notation and / segmentation.
+
+GLOBS
+
+Globs are strings of literal characters to MATCH filepaths.
+
+Globbing is the act of locating files on a filesystem using one or more globs.
+
+The example GLOB below will match all .js inside the public/scripts folder AND all subfolders.
+
+	let jsFiles = './app/public/scripts/**/*.js'
+
+The gulp API function such as src() expect a glob or an ARRAY of GLOBS src([<glob>, <glob>])
+
+When an array of globs is used, they are matched in array order - especially useful for negative globs.
+
+GLOB PATTERNS
+
+Single star <*> matches all files in the directory or all files of a specific type. The double star <**> matches all files across segments, thus inside nested folders.
+
+	'*.js'; '.app/**'; '.app/scripts/**/*js'
+
+The NEGATIVE <!> glob can exclude files or folders when part of an array of globs. The first glob in the array matches files, the second one excludes some of the result. To exclude all files in that folder use **.
+
+	['.app/scripts/**/*js', '!.app/scripts/vendor/**']
+	['**/*js', '!node_modules/**']
+
+EXCLUDE FOLDERS
+
+      'src/**/*',         //select all files
+      '!src/**/_*/',      //exclude folders starting with '_'
+      '!src/**/_*/**/*',  //exclude files/subfolders in folders 

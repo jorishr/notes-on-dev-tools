@@ -1,0 +1,87 @@
+############
+BUILD TASKS
+############
+
+The build of the project is the final production code that goes to the server. The most common tasks run on the development files are: copied to dist folder, optimize images, minfy/uglify, concatenate files, update paths inside files, add hashes to files.
+
+Note that in build you use diferent GLOBS as you only select the finished endpoint files for html, css and js.
+
+###CLEAN START###
+
+Start with a clean directory so remove existing dist folders by using del(). 
+
+###CONCATENATE CSS RESET/NORMALIZE WITH MAIN CSS###
+
+Concatenate various css files into ONE minified css file using the concat() method from the GULP-CONCAT package. In the src() you define the array of files to concatenate. In the concat() method you can specify the filename of the resulting css file.
+	
+	src(['','',''])
+	.pipe(concat('main.min.css'))
+	.pipe(cssnano())
+
+CSS3 Animations may brake after minification. Fix this by using the options: reduceIdents: {keyframes: false}, discardUnused: {
+keyframes: false}
+
+###MINIFICATION###
+
+Minify the css files using the package GULP-CSSNANO and the method .pipe(cssnano()); Same process for the js files with GULP-UGLIFY and the method .pipe(uglify()); 
+
+The GULP-HTMLMIN package with .pipe(htmlMin()); accepts an OBJECT with options: 
+
+ 	htmlMin({collapseWhitespace: true, removeComments: true})
+	
+
+###IMAGE TASKS AND PLUGINS###
+
+The GULP-IMAGEMIN package minifies the images and comes bundled with the following lossless optimizers: gifsicle, jpegtran, optipng, and svgo. 
+
+Using the imagemin() method is enough but you can specify, see documentation:
+ 
+	imagemin([imagemin.gifsicle({property: value}), 	imagemin.jpegtran({property: value}), ...])
+
+###REVISIONING###
+
+The benefit of adding content hashes has to do with server caching and load time. You indicate to the server to cache the main files and never reload them again, thus speeding up the site.
+
+Only when a new file is detected, a new load happens.
+
+The GULP-REV package adds asset revisioning by appending a CONTENT HASH to filenames. Do this after minification and other tasks.
+
+To log the changes and original filenames you can add another pipe that stores the rev-manifest.json in the folder you want.
+
+Then in another function you use that data to update the HTML file where the hashed js and css files are referenced. Using the rev-replace() method form the REV-REPLACE package.
+
+	.pipe(rev())
+     	.pipe(dest())
+     	.pipe(rev.manifest())   // produces rev-manifest.json
+     	.pipe(dest())
+
+ 	function revCssUpdate(){
+    		let manifest = src(distCssFolder + '/rev-						manifest.json');
+    		return src(distHtml)
+        		.pipe(revReplace({manifest: manifest}))
+        		.pipe(dest(distFolder));
+ 	};
+
+
+###REPLACE IN FILE###	
+
+Copy the index.html and adjust the PATHS/FILENAMES/attributes if necessary with the REPLACE-IN-FILE package. 
+
+###END CLEAN###
+
+End the build by removing unnecessary file that may have been generated.
+
+The final build task can be stored as function or variable:
+
+ 	function build(){
+    		series(
+        		startClean, 
+       			parallel(minifyHtml, optimizeImages), 
+        		parallel(
+            		series(cssBuild, revCssUpdate), 
+            		series(jsBuild, revJsUpdate), 
+            	replacePaths), 
+        		endClean
+    		);
+	};
+ 	module.exports = build;
